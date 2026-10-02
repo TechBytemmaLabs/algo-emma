@@ -1,0 +1,44 @@
+[project]
+name = "algo-emma"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "nautilus-trader>=1.231.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.18,<0.13"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.8",
+    "ty>=0.0.81",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+# Recommended rule selection:
+# E/W: pycodestyle, F: Pyflakes, I: isort (import sorting)
+# B: flake8-bugbear (detects common bugs), C4: flake8-comprehensions
+# UP: pyupgrade (upgrades old syntax), SIM: flake8-simplify
+# N: pep8-naming, ARG: flake8-unused-arguments
+select = ["E", "W", "F", "I", "B", "C4", "UP", "SIM", "N", "ARG"]
+# Specific rules to ignore if they prove too strict
+ignore = [
+    "E501", # Ignore line length violations in comments/docstrings if the formatter manages them
+]
+
+[tool.ruff.lint.isort]
+# Automatically combine imports from the same module into a single line
+combine-as-imports = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true # Enables automatic formatting of code snippets inside docstrings
