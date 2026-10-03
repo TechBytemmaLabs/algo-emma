@@ -1,47 +1,30 @@
 from collections.abc import Sequence
 from datetime import date
-from typing import NamedTuple, Protocol
+from typing import Protocol
 
 from algo_emma.domain.config import UniverseRankingConfig
 from algo_emma.domain.elegibility import is_eligible_asset
 from algo_emma.domain.indicators import RateOfChange, SimpleMovingAverage
-from algo_emma.domain.models import Bar, RankedAsset
-
-
-class RankingCandidate(NamedTuple):
-    symbol: str
-    liquidity: float
-    rate_of_change: float
+from algo_emma.domain.models import Bar, RankedAsset, RankingCandidate
 
 
 class UniverseRanker(Protocol):
-    def rank_assets(self, ranking_date: date, market_data: Sequence[Bar]) -> Sequence[RankedAsset]:
-        """
-        Build the universe ranking for one day.
+    """Builds a daily ranking from eligible assets and available market data.
 
-        Implementations must evaluate only data available on or before the
-        requested date and return assets ordered by their ranking criteria.
-        """
+    Implementations evaluate historical data through `ranking_date`, discard
+    ineligible assets, and select the most liquid ones. They calculate liquidity
+    and rate of change, keep the configured number of assets with the highest
+    liquidity, and assign consecutive ranks starting at 1.
+    """
+
+    def rank_assets(self, ranking_date: date, market_data: Sequence[Bar]) -> Sequence[RankedAsset]: ...
 
 
 class UniverseRankingService(UniverseRanker):
-    """
-    Selects most liquid assets and order them by short-term price momentum.
-
-    The service first applies the eligibility rules and liquidity cutoff, then
-    orders the selected universe by the configured rate of change.
-    """
-
     def __init__(self, config: UniverseRankingConfig | None = None) -> None:
         self._config = config or UniverseRankingConfig()
 
     def rank_assets(self, ranking_date: date, market_data: Sequence[Bar]) -> Sequence[RankedAsset]:
-        """
-        Build the ranking for one date using no data after that date.
-
-        Each symbol is evaluated with its historical bars through `ranking_date`, which
-        keeps the ranking deterministic and prevents look-ahead bias.
-        """
         ranking_candidates: list[RankingCandidate] = []
 
         for symbol, bars in self.group_bars_by_symbol(market_data).items():

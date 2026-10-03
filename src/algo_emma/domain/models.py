@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 from enum import Enum
+from typing import NamedTuple
 
 
 class BarType(Enum):
@@ -33,6 +34,12 @@ class Bar:
     close: float
     volume: float
     volume_usdt: float
+
+
+class RankingCandidate(NamedTuple):
+    symbol: str
+    liquidity: float
+    rate_of_change: float
 
 
 @dataclass(frozen=True)

@@ -6,7 +6,8 @@ from .models import Bar
 
 
 def _find_price_breaks(closes: Sequence[float], upward_jump_ratio: float, downward_jump_ratio: float) -> list[int]:
-    """Find close-to-close jumps that may indicate a token redenomination.
+    """
+    Find close-to-close jumps that may indicate a token redenomination.
 
     The returned indexes identify suspicious discontinuities so eligibility can
     require a recovery period before considering the asset.
