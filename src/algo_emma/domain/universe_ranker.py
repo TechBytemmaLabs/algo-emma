@@ -5,6 +5,7 @@ from typing import Protocol
 from algo_emma.domain.config import UniverseRankingConfig
 from algo_emma.domain.elegibility import is_eligible_asset
 from algo_emma.domain.indicators import RateOfChange, SimpleMovingAverage
+from algo_emma.domain.market_data import MarketData
 from algo_emma.domain.models import Bar, RankedAsset, RankingCandidate
 
 
@@ -27,7 +28,7 @@ class UniverseRankingService(UniverseRanker):
     def rank_assets(self, ranking_date: date, market_data: Sequence[Bar]) -> Sequence[RankedAsset]:
         ranking_candidates: list[RankingCandidate] = []
 
-        for symbol, bars in self.group_bars_by_symbol(market_data).items():
+        for symbol, bars in MarketData.group_by_symbol(market_data).items():
             if not is_eligible_asset(
                 bars=bars,
                 min_history_bars=self._config.minimum_history_bars,
@@ -58,12 +59,3 @@ class UniverseRankingService(UniverseRanker):
             )
             for rank, (symbol, liquidity, rate_of_change) in enumerate(ranking_candidates, start=1)
         ]
-
-    @staticmethod
-    def group_bars_by_symbol(bars: Sequence[Bar]) -> dict[str, list[Bar]]:
-        bars_by_symbol: dict[str, list[Bar]] = {}
-
-        for bar in bars:
-            bars_by_symbol.setdefault(bar.symbol, []).append(bar)
-
-        return bars_by_symbol

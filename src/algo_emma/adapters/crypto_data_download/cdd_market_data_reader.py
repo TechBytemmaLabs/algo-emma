@@ -30,6 +30,18 @@ class CDDMarketDataReader(ForGettingHistoricalMarketData):
 
         return sorted(bars, key=lambda bar: (bar.date, bar.symbol))
 
+    def get_through(self, end_date: date) -> Sequence[Bar]:
+        print(f"Requesting data through {end_date}")
+
+        bars = [
+            bar
+            for path in sorted(self._raw_data_directory.glob("*_d.csv"))
+            for bar in self._read_file(path)
+            if bar.date <= end_date
+        ]
+
+        return sorted(bars, key=lambda bar: (bar.date, bar.symbol))
+
     @staticmethod
     def _read_file(path: Path) -> Sequence[Bar]:
         with path.open(newline="", encoding="utf-8") as file:

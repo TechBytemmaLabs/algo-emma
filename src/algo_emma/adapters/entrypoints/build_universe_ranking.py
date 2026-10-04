@@ -10,7 +10,7 @@ from algo_emma.domain.universe_ranker import UniverseRankingService
 
 ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_RAW_DATA_DIR = ROOT / "data" / "raw" / "binance_spot_daily"
-DEFAULT_OUTPUT_DIR = ROOT / "data" / "processed"
+DEFAULT_RANKING_DIR = ROOT / "data" / "processed" / "universe_ranking"
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -32,7 +32,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"Generating universe ranking for {ranking_date}")
         try:
             output_path = args.output_file or Path(
-                f"{DEFAULT_OUTPUT_DIR}/universe_ranking_{ranking_date.strftime('%Y%m%d')}.csv"
+                f"{DEFAULT_RANKING_DIR}/universe_ranking_{ranking_date.strftime('%Y%m%d')}.csv"
             )
             universe_ranker = UniverseRankingService()
             market_data_reader = CDDMarketDataReader(args.raw_data_directory)
