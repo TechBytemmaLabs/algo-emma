@@ -18,7 +18,7 @@ from nautilus_trader.model.events import PositionOpened as NautilusPositionOpene
 from nautilus_trader.trading import Strategy
 
 from algo_emma.application.generate_entry_signal import GenerateEntrySignal
-from algo_emma.domain.config import PositionSizingConfig
+from algo_emma.domain.exceptions import UniverseRankingNotAvailableError
 from algo_emma.domain.indicators import AverageTrueRange
 from algo_emma.domain.models import Bar, BarType, LongBreakoutEntrySignal
 from algo_emma.domain.position_sizing import calculate_entry_quantity, can_open_position
@@ -99,7 +99,12 @@ class ShortTermMomentumStrategy(Strategy):
 
         self.log.info(f"{symbol}({date}): Processing daily bar {bar}")
 
-        entry_signal = self.entry_signal_generator.execute(current_bar, average_true_range)
+        try:
+            entry_signal = self.entry_signal_generator.execute(current_bar, average_true_range)
+        except UniverseRankingNotAvailableError:
+            self.log.warning(f"{symbol}({date}): No universe ranking available; skipping entries for this date")
+            return
+
         if not entry_signal:
             return
 

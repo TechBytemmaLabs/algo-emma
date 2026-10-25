@@ -16,12 +16,12 @@ The stop order waits for price to break above the prior high. If price keeps fal
 
 ### Current implementation status
 
-- Daily rankings currently select the 20 most liquid eligible assets, then assign rank by liquidity. The reference calls for ranking that selected universe by ROC10; this is a known difference.
+- Daily rankings select the 20 most liquid eligible assets using the configured moving average of USDT volume, then rank that universe by ROC10. The strategy checks universe membership but does not use rank to prioritize orders when more than 10 candidates compete for slots.
 - Entry orders use the daily bar high plus `0.75 × ATR(3)` and expire according to the signal's configured order lifetime.
 - The strategy schedules a position close two days after Nautilus reports the position opened. On strategy stop, it also cancels pending orders and requests closure of open positions.
 - Position sizing allocates account equity across 10 positions. The current fee assumption is 0.1% maker and taker, stored on catalog instruments; it is configurable during catalog generation. Raw CSV data does not contain fee history.
 
-Backtest returns describe the current implementation and its assumptions. They should not be treated as results for the reference strategy until the ROC10 ordering and other strategy semantics match the specification.
+Backtest returns describe the current implementation and its assumptions. They should not be treated as results for the full reference strategy until rank-based order priority and other strategy semantics match the specification.
 
 ## Data and backtests
 

@@ -10,18 +10,28 @@ from algo_emma.domain.models import Bar, RankedAsset, RankingCandidate
 
 
 class UniverseRanker(Protocol):
-    """Builds a daily ranking from eligible assets and available market data.
+    """
+    Contract for creating a daily asset ranking from historical market data.
 
-    Implementations evaluate historical data through `ranking_date`, discard
-    ineligible assets, and select the most liquid ones. They calculate liquidity
-    and rate of change, keep the configured number of assets with the highest
-    liquidity, and assign consecutive ranks starting at 1.
+    Implementations return ranked assets for `ranking_date`. Asset eligibility,
+    selection criteria, and ranking order are defined by each implementation.
     """
 
     def rank_assets(self, ranking_date: date, market_data: Sequence[Bar]) -> Sequence[RankedAsset]: ...
 
 
 class UniverseRankingService(UniverseRanker):
+    """
+    Select liquid eligible assets, then rank them by recent momentum.
+
+    For each symbol, the service checks the configured history and price-jump
+    eligibility rules, then calculates average quote-volume liquidity and rate
+    of change from the supplied bars. It selects the configured number of
+    highest-liquidity assets and ranks that universe by rate of change in
+    descending order. Liquidity and symbol provide deterministic tie-breakers.
+    Ranks start at 1 for the supplied ranking date.
+    """
+
     def __init__(self, config: UniverseRankingConfig | None = None) -> None:
         self._config = config or UniverseRankingConfig()
 
@@ -48,6 +58,14 @@ class UniverseRankingService(UniverseRanker):
 
         ranking_candidates = sorted(ranking_candidates, key=lambda candidate: (-candidate.liquidity, candidate.symbol))
         ranking_candidates = ranking_candidates[: self._config.universe_size]
+        ranking_candidates = sorted(
+            ranking_candidates,
+            key=lambda candidate: (
+                -candidate.rate_of_change,
+                -candidate.liquidity,
+                candidate.symbol,
+            ),
+        )
 
         return [
             RankedAsset(

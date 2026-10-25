@@ -5,8 +5,8 @@ class UniverseRankingNotAvailableError(Exception):
     """
     The universe ranking is unavailable for the requested date.
 
-    Raised when the daily ranking is missing or empty. Consumers must let
-    this exception propagate because the strategy cannot run without a ranking.
+    Raised when the daily ranking is missing or empty. Consumers can decide
+    whether to skip that date or treat the missing ranking as an error.
     """
 
     def __init__(self, ranking_date: date) -> None:
