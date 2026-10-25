@@ -65,12 +65,7 @@ class RankedAsset:
 
 @dataclass(frozen=True)
 class LongBreakoutEntrySignal:
-    """
-    Immutable long breakout entry signal for one symbol.
-
-    It contains the stop price, the reference bar date, and the expiry date
-    needed to place a pending buy stop order.
-    """
+    """Stop-entry details for the reference short-term momentum strategy."""
 
     symbol: str
     stop_price: float
@@ -85,11 +80,39 @@ class LongBreakoutEntrySignal:
         config: LongBreakoutEntrySignalConfig | None = None,
     ) -> LongBreakoutEntrySignal:
         config = config or LongBreakoutEntrySignalConfig()
-        expires_at = datetime.combine(bar.date + timedelta(days=config.order_lifetime_days + 1), datetime.min.time(), tzinfo=UTC)
-
+        expires_at = datetime.combine(
+            bar.date + timedelta(days=config.order_lifetime_days + 1),
+            datetime.min.time(),
+            tzinfo=UTC,
+        )
         return cls(
             symbol=bar.symbol,
             reference_date=bar.date,
             expires_at=expires_at,
-            stop_price=bar.high + (config.average_true_range_multiplier * average_true_range),
+            stop_price=bar.high + config.average_true_range_multiplier * average_true_range,
+        )
+
+
+@dataclass(frozen=True)
+class SmaTrendSignal:
+    """Entry or exit decision based on a daily close and its 200-day average."""
+
+    symbol: str
+    reference_date: date
+    should_enter: bool
+    should_exit: bool
+
+    @classmethod
+    def from_bar(
+        cls,
+        bar: Bar,
+        moving_average: float,
+        is_asset_ranked: bool,
+        has_open_position: bool,
+    ) -> SmaTrendSignal:
+        return cls(
+            symbol=bar.symbol,
+            reference_date=bar.date,
+            should_enter=is_asset_ranked and not has_open_position and bar.close > moving_average,
+            should_exit=has_open_position and bar.close < moving_average,
         )

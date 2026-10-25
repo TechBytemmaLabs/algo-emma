@@ -17,7 +17,7 @@ from nautilus_trader.model.enums import OrderSide, TimeInForce, TriggerType
 from nautilus_trader.model.events import PositionOpened as NautilusPositionOpened
 from nautilus_trader.trading import Strategy
 
-from algo_emma.application.generate_entry_signal import GenerateEntrySignal
+from algo_emma.application.generate_long_breakout_entry_signal import GenerateLongBreakoutEntrySignal
 from algo_emma.domain.exceptions import UniverseRankingNotAvailableError
 from algo_emma.domain.indicators import AverageTrueRange
 from algo_emma.domain.models import Bar, BarType, LongBreakoutEntrySignal
@@ -52,12 +52,16 @@ class ShortTermMomentumStrategy(Strategy):
     needs to be implemented.
     """
 
-    def __init__(self, config: ShortTermMomentumStrategyConfig, entry_signal_generator: GenerateEntrySignal) -> None:
+    def __init__(
+        self,
+        config: ShortTermMomentumStrategyConfig,
+        entry_signal_generator: GenerateLongBreakoutEntrySignal,
+    ) -> None:
         super().__init__(config)
 
         self.average_true_ranges = {}
         self.account: NautilusAccount | None = None
-        self.entry_signal_generator: GenerateEntrySignal = entry_signal_generator
+        self.entry_signal_generator: GenerateLongBreakoutEntrySignal = entry_signal_generator
 
     def on_start(self) -> None:
         self.account = self.portfolio.account(venue=self.config.venue)

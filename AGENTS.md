@@ -13,10 +13,11 @@ This repository implements daily crypto market-data ingestion, universe ranking,
 - Keep financial calculations and timestamps explicit. Watch for look-ahead when deciding which completed daily bar can be used for a signal.
 - Do not describe a target strategy rule as implemented unless the current code supports it. Report gaps between the reference strategy and implementation.
 - Prefer clear domain names, short docstrings, and focused changes. Run only relevant checks and report what they establish.
+- Keep diffs limited to changes required by the request. Do not reformat code or rewrite comments/docstrings unless explicitly requested; preserve surrounding style so review shows only meaningful changes.
 
 ## Reference strategy
 
-Strategy #1, Short-Term Momentum, is the target specification documented in [README.md](README.md). Treat it as the reference when discussing intended behavior. The implementation-status section in the README records known differences; update it when behavior changes.
+Strategy #1, Short-Term Momentum, is the target specification documented in [README.md](README.md). Treat it as the reference when discussing intended behavior. The reference strategy status section in the README records known differences; update it when behavior changes.
 
 ## Useful commands
 
