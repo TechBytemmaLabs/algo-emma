@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Self
+from typing import TYPE_CHECKING, Self
 
-from .models import Bar
+if TYPE_CHECKING:
+    from algo_emma.domain.models import Bar
 
 
 class SimpleMovingAverage(float):
@@ -66,3 +67,7 @@ class AverageTrueRange(float):
             TrueRange(bars[i].high, bars[i].low, bars[i - 1].close) for i in range(len(bars) - period, len(bars))
         ]
         return super().__new__(cls, sum(true_ranges) / period)
+
+    @classmethod
+    def from_value(cls, value: float) -> Self:
+        return super().__new__(cls, value)

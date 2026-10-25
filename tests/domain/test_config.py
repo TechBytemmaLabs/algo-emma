@@ -1,6 +1,6 @@
 import pytest
 
-from algo_emma.domain.config import UniverseRankingConfig
+from algo_emma.domain.config import LongBreakoutEntrySignalConfig, UniverseRankingConfig
 
 
 @pytest.mark.parametrize(
@@ -18,3 +18,17 @@ from algo_emma.domain.config import UniverseRankingConfig
 def test_universe_ranking_config_rejects_invalid_parameters(config: str, value: int) -> None:
     with pytest.raises(ValueError, match=config):
         UniverseRankingConfig(**{config: value})
+
+
+@pytest.mark.parametrize(
+    ("config", "value"),
+    [
+        ("average_true_range_period", 0),
+        ("average_true_range_period", -1),
+        ("average_true_range_multiplier", 0),
+        ("average_true_range_multiplier", -1),
+    ],
+)
+def test_long_breakout_entry_setup_config_rejcts_invalid_parameters(config: str, value: int) -> None:
+    with pytest.raises(ValueError, match=config):
+        LongBreakoutEntrySignalConfig(**{config: value})

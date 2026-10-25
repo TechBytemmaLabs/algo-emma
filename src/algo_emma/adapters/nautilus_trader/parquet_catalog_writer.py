@@ -12,9 +12,12 @@ from algo_emma.domain.models import Bar
 from algo_emma.ports import ForPersistingBacktestData
 
 
-class NautilusParquetCatalogWriter(ForPersistingBacktestData):
-    def __init__(self, path: Path) -> None:
+class ParquetCatalogWriter(ForPersistingBacktestData):
+    def __init__(self, path: Path, fee_rate: Decimal = Decimal("0.001")) -> None:
+        if not fee_rate.is_finite() or fee_rate < 0:
+            raise ValueError("fee_rate must be finite and non-negative")
         self._catalog = ParquetDataCatalog(path=path)
+        self._fee_rate = fee_rate
 
     def store_data(self, market_data: Sequence[Bar]) -> None:
         instruments = []
@@ -39,6 +42,8 @@ class NautilusParquetCatalogWriter(ForPersistingBacktestData):
                 lot_size=Quantity.from_int(1),
                 margin_init=Decimal("0"),
                 margin_maint=Decimal("0"),
+                maker_fee=self._fee_rate,
+                taker_fee=self._fee_rate,
             )
             instruments.append(instrument)
 

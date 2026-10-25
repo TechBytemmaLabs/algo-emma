@@ -1,9 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 from enum import Enum
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
+
+from algo_emma.domain.config import LongBreakoutEntrySignalConfig
+
+if TYPE_CHECKING:
+    from algo_emma.domain.indicators import AverageTrueRange
 
 
 class BarType(Enum):
@@ -56,3 +61,35 @@ class RankedAsset:
     rank: int
     rate_of_change: float
     liquidity_usdt: float
+
+
+@dataclass(frozen=True)
+class LongBreakoutEntrySignal:
+    """
+    Immutable long breakout entry signal for one symbol.
+
+    It contains the stop price, the reference bar date, and the expiry date
+    needed to place a pending buy stop order.
+    """
+
+    symbol: str
+    stop_price: float
+    reference_date: date
+    expires_at: datetime
+
+    @classmethod
+    def from_bar(
+        cls,
+        bar: Bar,
+        average_true_range: AverageTrueRange,
+        config: LongBreakoutEntrySignalConfig | None = None,
+    ) -> LongBreakoutEntrySignal:
+        config = config or LongBreakoutEntrySignalConfig()
+        expires_at = datetime.combine(bar.date + timedelta(days=config.order_lifetime_days + 1), datetime.min.time(), tzinfo=UTC)
+
+        return cls(
+            symbol=bar.symbol,
+            reference_date=bar.date,
+            expires_at=expires_at,
+            stop_price=bar.high + (config.average_true_range_multiplier * average_true_range),
+        )

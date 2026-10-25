@@ -35,3 +35,44 @@ class UniverseRankingConfig:
             raise ValueError("price_break_up_ratio must be greater than 1")
         if not 0 < self.price_break_down_ratio < 1:
             raise ValueError("price_break_down_ratio must be between 0 and 1")
+
+
+@dataclass(frozen=True)
+class PositionSizingConfig:
+    """
+    Business parameters used to calculate equal capital allocations.
+
+    The immutable configuration defines the maximum number of open positions
+    used to divide account equity into equal allocations and validates the
+    limit at construction time.
+    """
+
+    max_open_positions: int = 10
+    entry_cost_buffer_ratio: float = 0.01
+
+    def __post_init__(self) -> None:
+        if self.max_open_positions <= 0:
+            raise ValueError("max_open_positions must be positive")
+        if self.entry_cost_buffer_ratio < 0:
+            raise ValueError("entry_cost_buffer_ratio cannot be negative")
+
+
+@dataclass(frozen=True)
+class LongBreakoutEntrySignalConfig:
+    """
+    Configuration for long breakout entry setups.
+
+    The ATR period determines how volatility is measured. The multiplier scales
+    that volatility into a buffer added to the completed ranking day's high to
+    calculate the entry stop price.
+    """
+
+    average_true_range_multiplier: float = 0.75
+    order_lifetime_days: int = 1
+
+    def __post_init__(self) -> None:
+        if self.average_true_range_multiplier <= 0:
+            raise ValueError("average_true_range_multiplier must be greater than 0")
+
+        if self.order_lifetime_days < 1:
+            raise ValueError("order_lifetime_days must be greater or equals than 1")

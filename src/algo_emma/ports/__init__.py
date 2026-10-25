@@ -35,6 +35,18 @@ class ForPersistingUniverseRanking(Protocol):
         ...
 
 
+class ForReadingUniverseRanking(Protocol):
+    def get_for_date(self, ranking_date: date) -> Sequence[RankedAsset]:
+        """
+        Return the daily universe ranking in ascending rank order.
+
+        Raises:
+            UniverseRankingNotAvailableError: The daily ranking is missing or empty.
+                Consumers must let this exception propagate to stop execution.
+        """
+        ...
+
+
 class ForPersistingBacktestData(Protocol):
     def store_data(self, market_data: Sequence[Bar]) -> None:
         """
